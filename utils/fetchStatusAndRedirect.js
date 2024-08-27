@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { get } = require('follow-redirects');
 const getStatusColor = require('./getStatusColor');
 
 const fetchStatusAndRedirect = async (url) => {
@@ -19,28 +18,15 @@ const fetchStatusAndRedirect = async (url) => {
       statusColor: getStatusColor(response.status),
     };
   } catch (error) {
-    if (error.response) {
-      // Response error
-      return {
-        statusCode: error.response.status,
-        redirectedUrl: error.response.request.res.responseUrl || url,
-        statusColor: getStatusColor(error.response.status),
-      };
-    } else if (error.request) {
-      // No response received
-      return {
-        statusCode: 500,
-        redirectedUrl: url,
-        statusColor: getStatusColor(500),
-      };
-    } else {
-      // Other errors
-      return {
-        statusCode: 500,
-        redirectedUrl: url,
-        statusColor: getStatusColor(500),
-      };
-    }
+    const statusCode = error.response?.status || 500;
+    const redirectedUrl = error.response?.request?.res?.responseUrl || url;
+    const errorStatusColor = getStatusColor(statusCode);
+
+    return {
+      statusCode,
+      redirectedUrl,
+      statusColor: errorStatusColor,
+    };
   }
 };
 
