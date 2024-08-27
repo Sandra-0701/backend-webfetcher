@@ -1,18 +1,18 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config(); 
+
 const app = express();
 const port = process.env.PORT || 5000;  // Use Vercel's port or fallback to 5000 for local development
 
 // Middleware
 app.use(express.json());
+
+// CORS Middleware
 app.use(cors({
-  origin: ['https://web-page-fetcher.vercel.app/', '*'], 
+  origin: ['https://web-page-fetcher.vercel.app'],  // Specify the exact frontend domain
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
-
 
 // Route imports
 const extractUrls = require('./routes/extractUrls');
@@ -37,7 +37,7 @@ app.use('/api/page-properties', pageProperties);
 app.use('/api/heading-hierarchy', headingHierarchy);
 app.use('/api/all-details', allDetails);
 
-
+// Handle 404 for undefined routes
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Route not found' });
 });
