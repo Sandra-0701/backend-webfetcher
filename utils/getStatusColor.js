@@ -1,7 +1,7 @@
 const getStatusColor = (statusCode) => {
     if (statusCode >= 500) return 'red'; // Server errors
     if (statusCode >= 400) return 'orange'; // Client errors
-    if (statusCode >= 300) return 'yellow'; // Redirects
+    if (statusCode >= 300) return 'blue'; // Redirects
     return 'green'; // Successful responses
   };
   
