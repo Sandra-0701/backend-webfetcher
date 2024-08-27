@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const getPageContent = require('../utils/getPageContent');
 const processLink = require('../utils/processLink');
+const cheerio = require('cheerio');
 
 router.post('/', async (req, res) => {
   const { url, onlyUhf = false } = req.body;
@@ -10,12 +11,11 @@ router.post('/', async (req, res) => {
     // Fetch page content based on the UHF flag
     const { content, header, footer } = await getPageContent(url, onlyUhf);
 
+    // Check if content, header, or footer is missing
     if (!content && !header && !footer) {
       return res.status(500).send('Failed to fetch page content.');
     }
 
-    // Load Cheerio depending on the onlyUhf flag
-    const cheerio = require('cheerio');
     let $;
     
     if (onlyUhf) {
@@ -35,8 +35,8 @@ router.post('/', async (req, res) => {
     // Respond with link details
     res.json({ links });
   } catch (error) {
-    console.error('Error in /link-details route:', error.message);
-    return res.status(500).send('Failed to process page content.');
+    console.error('Error in /link-details route:', error.stack || error.message);
+    res.status(500).send(`Failed to process page content: ${error.message}`);
   }
 });
 
