@@ -9,7 +9,7 @@ app.use(express.json());
 
 // CORS Middleware
 app.use(cors({
-  origin: ['https://web-page-fetcher.vercel.app'],  // Specify the exact frontend domain
+  origin: 'https://web-page-fetcher.vercel.app',  // Specify the exact frontend domain
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('Internal Server Error:', err.message);
+  console.error('Internal Server Error:', err.stack);  // Log the stack trace for better debugging
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
