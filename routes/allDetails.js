@@ -6,7 +6,7 @@ const processLink = require('../utils/processLink');
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-  const { url } = req.body;
+  const { url, onlyUhf } = req.body;
 
   if (!url) {
     return res.status(400).send('URL is required');
@@ -99,7 +99,7 @@ router.post('/', async (req, res) => {
       pageProperties,
       links,
       images,
-      headings,
+      headingHierarchy: headings,
       videoDetails
     };
 
