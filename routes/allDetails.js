@@ -94,15 +94,6 @@ router.post('/', async (req, res) => {
       videoDetails.push(videoDetail);
     });
 
-    // Prepare response object
-    const response = {
-      pageProperties,
-      links,
-      images,
-      headingHierarchy: headings,
-      videoDetails
-    };
-
     // Extract UHF content
     const uhfHeader = $('header').html() || '';
     const uhfFooter = $('footer').html() || '';
@@ -110,8 +101,19 @@ router.post('/', async (req, res) => {
     console.log('Extracted UHF Header:', uhfHeader);
     console.log('Extracted UHF Footer:', uhfFooter);
 
-    response.uhfHeader = uhfHeader;
-    response.uhfFooter = uhfFooter;
+    // Prepare response object based on onlyUhf flag
+    const response = {
+      links,
+      images,
+      headingHierarchy: headings,
+      uhfHeader,
+      uhfFooter
+    };
+
+    if (!onlyUhf) {
+      response.pageProperties = pageProperties;
+      response.videoDetails = videoDetails;
+    }
 
     // Respond with the content
     res.json(response);
