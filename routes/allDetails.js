@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const processLink = require('../utils/processLink');
+const getStatusColor = require('../utils/getStatusColor');
 
 const router = express.Router();
 
@@ -35,20 +36,22 @@ router.post('/', async (req, res) => {
     // Add title to page properties
     pageProperties.push({
       name: 'title',
-      content: $('title').text().trim() || 'No Title'
+      content: $('title').text().trim() || 'No Title',
     });
 
     // Extract link details
     const linkElements = $('a').toArray();
-    const linkPromises = linkElements.map(link => processLink(link, $));
+    const linkPromises = linkElements.map((link) => processLink(link, $));
     links = await Promise.all(linkPromises);
 
     // Extract images
-    images = $('img').map((_, element) => ({
-      imageName: $(element).attr('src')?.trim() || 'No Source',
-      alt: $(element).attr('alt')?.trim() || 'No Alt Text',
-      hasAlt: !!$(element).attr('alt'),
-    })).get();
+    images = $('img')
+      .map((_, element) => ({
+        imageName: $(element).attr('src')?.trim() || 'No Source',
+        alt: $(element).attr('alt')?.trim() || 'No Alt Text',
+        hasAlt: !!$(element).attr('alt'),
+      }))
+      .get();
 
     // Extract heading hierarchy
     const extractHeadings = (element, level = 1) => {
@@ -61,7 +64,7 @@ router.post('/', async (req, res) => {
           headings.push({
             level: headingLevel,
             text: $child.text().trim(),
-            children: extractHeadings($child, level + 1)
+            children: extractHeadings($child, level + 1),
           });
         } else {
           headings.push(...extractHeadings($child, level));
@@ -77,14 +80,15 @@ router.post('/', async (req, res) => {
       const videoElement = $(element);
       const options = JSON.parse(videoElement.attr('options') || '{}');
 
-      const audioTrackButton = videoElement.find('.vjs-audio-button.vjs-menu-button.vjs-menu-button-popup.vjs-button').length > 0;
+      const audioTrackButton =
+        videoElement.find('.vjs-audio-button.vjs-menu-button.vjs-menu-button-popup.vjs-button').length > 0;
       const audioTrackPresent = audioTrackButton ? 'yes' : 'no';
 
       const videoDetail = {
         transcript: (options.downloadableFiles || [])
-          .filter(file => file.mediaType === 'transcript')
-          .map(file => file.locale || ''),
-        cc: (options.ccFiles || []).map(file => file.locale || ''),
+          .filter((file) => file.mediaType === 'transcript')
+          .map((file) => file.locale || ''),
+        cc: (options.ccFiles || []).map((file) => file.locale || ''),
         autoplay: options.autoplay ? 'yes' : 'no',
         muted: options.muted ? 'yes' : 'no',
         ariaLabel: options.ariaLabel || options.title || '',
@@ -107,15 +111,11 @@ router.post('/', async (req, res) => {
       images,
       headingHierarchy: headings,
       uhfHeader,
-      uhfFooter
+      uhfFooter,
+      pageProperties,
+      videoDetails,
     };
 
-    if (!onlyUhf) {
-      response.pageProperties = pageProperties;
-      response.videoDetails = videoDetails;
-    }
-
-    // Respond with the content
     res.json(response);
   } catch (error) {
     console.error('Detailed error:', error);
